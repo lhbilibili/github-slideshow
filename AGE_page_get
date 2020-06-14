@@ -1,0 +1,60 @@
+# Script name：AGE_page_get.py
+# description：通过爬取AGE网站的信息得到有动漫的播放链接
+# python3.7
+# encoding: utf-8
+
+
+import requests
+from lxml import etree
+import os
+# 输入动漫名称或关键词
+word = input("enter a keyword:")
+# if not os.path.exists(word):
+#     os.mkdir(word)
+headers = {
+    'User-Agent':"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"
+}
+url = 'https://www.agefans.tv/search?'
+params = {
+    'query': word,
+    'page': 1
+}
+cookies = requests.Session()
+# 爬取对应关键词所对应的网页
+page_text = cookies.get(url=url,params=params,headers=headers).text
+tree = etree.HTML(page_text)
+# 爬取当前页面对应的图片、网页链接和文本
+content_div_list = tree.xpath('//div[@class="blockcontent1"]')
+for content_div in content_div_list:
+    content_href_list = content_div.xpath('./div/a/@href')
+    content_img_list = content_div.xpath('./div/a/img/@src')
+    content_name_list = content_div.xpath('./div/a/img/@alt')
+# print(content_href_list)
+# print(content_img_list)
+# print(content_name_list)
+i = 0
+# 对网页链接发起请求得到，最终为网盘资源
+for href,img_src,name in zip(content_href_list,content_img_list,content_name_list):
+    i += 1
+    href , img_src = 'https://www.agefans.tv' + href , 'https://www.agefans.tv' + img_src
+    # href_page = cookies.get(url=href,headers=headers).text
+    # 爬取图片
+    img = cookies.get(url=img_src,headers=headers).content
+    path = word + '/' + name
+    # if not os.path.exists(path):
+    #     os.mkdir(path)
+    img_path,href_path = path + '/'+ str(i) + ".jpg", path + '/' + str(i) + '.txt'
+    # with open(img_path,'wb') as fp:
+    #     fp.write(img)
+    # with open(href_path,'w',encoding='utf-8') as fp:
+    #     fp.write(href+name)
+    print("--------------")
+    print(path+"over!!!!")
+    print(href)
+	＃有许多多余
+
+
+
+
+
+
